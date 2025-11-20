@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Xkpester
+module Xkepster
   module Resources
     class Base
       attr_reader :client

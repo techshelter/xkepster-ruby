@@ -3,7 +3,7 @@
 require "spec_helper"
 require "openssl"
 
-RSpec.describe Xkpester::Webhook do
+RSpec.describe Xkepster::Webhook do
   let(:webhook_secret) { "test_webhook_secret_123" }
   let(:webhook) { described_class.new(webhook_secret: webhook_secret) }
   let(:timestamp) { Time.now.to_i }
@@ -30,7 +30,7 @@ RSpec.describe Xkpester::Webhook do
 
   before do
     # Reset configuration before each test
-    Xkpester.reset_configuration!
+    Xkepster.reset_configuration!
   end
 
   describe "#initialize" do
@@ -43,7 +43,7 @@ RSpec.describe Xkpester::Webhook do
 
     context "when webhook_secret is not provided" do
       it "uses the secret from configuration" do
-        Xkpester.configure do |config|
+        Xkepster.configure do |config|
           config.webhook_secret = "config_secret"
         end
         
@@ -118,7 +118,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises WebhookVerificationError" do
         expect {
           webhook.verify_and_parse("invalid_signature", body)
-        }.to raise_error(Xkpester::WebhookVerificationError, "Invalid webhook signature")
+        }.to raise_error(Xkepster::WebhookVerificationError, "Invalid webhook signature")
       end
     end
 
@@ -129,7 +129,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.verify_and_parse(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, /Invalid JSON payload/)
+        }.to raise_error(Xkepster::InvalidWebhookError, /Invalid JSON payload/)
       end
     end
 
@@ -141,7 +141,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.verify_and_parse(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, /Missing required fields/)
+        }.to raise_error(Xkepster::InvalidWebhookError, /Missing required fields/)
       end
     end
 
@@ -159,7 +159,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.verify_and_parse(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, /Unknown webhook event type/)
+        }.to raise_error(Xkepster::InvalidWebhookError, /Unknown webhook event type/)
       end
     end
 
@@ -167,7 +167,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.verify_and_parse(signature, body, "magic_link")
-        }.to raise_error(Xkpester::InvalidWebhookError, /Expected event type magic_link, got otp/)
+        }.to raise_error(Xkepster::InvalidWebhookError, /Expected event type magic_link, got otp/)
       end
     end
   end
@@ -197,7 +197,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.parse_otp_webhook(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, "Expected OTP webhook, got magic_link")
+        }.to raise_error(Xkepster::InvalidWebhookError, "Expected OTP webhook, got magic_link")
       end
     end
 
@@ -215,7 +215,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.parse_otp_webhook(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, /OTP webhook missing required fields/)
+        }.to raise_error(Xkepster::InvalidWebhookError, /OTP webhook missing required fields/)
       end
     end
 
@@ -229,7 +229,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.parse_otp_webhook(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, "Invalid OTP code format")
+        }.to raise_error(Xkepster::InvalidWebhookError, "Invalid OTP code format")
       end
     end
   end
@@ -259,7 +259,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.parse_magic_link_webhook(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, "Expected magic link webhook, got otp")
+        }.to raise_error(Xkepster::InvalidWebhookError, "Expected magic link webhook, got otp")
       end
     end
 
@@ -277,7 +277,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.parse_magic_link_webhook(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, /Magic link webhook missing required fields/)
+        }.to raise_error(Xkepster::InvalidWebhookError, /Magic link webhook missing required fields/)
       end
     end
 
@@ -291,7 +291,7 @@ RSpec.describe Xkpester::Webhook do
       it "raises InvalidWebhookError" do
         expect {
           webhook.parse_magic_link_webhook(signature, body)
-        }.to raise_error(Xkpester::InvalidWebhookError, "Invalid magic link URL format")
+        }.to raise_error(Xkepster::InvalidWebhookError, "Invalid magic link URL format")
       end
     end
   end

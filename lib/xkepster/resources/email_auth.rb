@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Xkpester
+module Xkepster
   module Resources
     class EmailAuth < Base
       def register(email:, group_id:)

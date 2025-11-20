@@ -1,4 +1,4 @@
-# Xkpester Ruby Client
+# Xkepster Ruby Client
 
 A Ruby client library for the [Xkepster authentication platform](https://github.com/techshelter/xkepster). Provides comprehensive user management, authentication (SMS and email), session handling, token management APIs, and webhook verification.
 
@@ -7,7 +7,7 @@ A Ruby client library for the [Xkepster authentication platform](https://github.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'xkpester-ruby'
+gem 'xkepster-ruby'
 ```
 
 And then execute:
@@ -16,16 +16,16 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install xkpester-ruby
+    $ gem install xkepster-ruby
 
 ## Configuration
 
 Configure the client globally:
 
 ```ruby
-require 'xkpester'
+require 'xkepster'
 
-Xkpester.configure do |config|
+Xkepster.configure do |config|
   config.api_key = ENV['XKEPSTER_API_KEY']  # Required: Your realm API key
   config.base_url = ENV['XKEPSTER_BASE_URL'] || 'https://your-xkepster-instance.com/api/json'
   config.webhook_secret = ENV['XKEPSTER_WEBHOOK_SECRET']  # Required for webhook verification
@@ -37,7 +37,7 @@ end
 Or configure per-client:
 
 ```ruby
-client = Xkpester::Client.new(
+client = Xkepster::Client.new(
   api_key: 'your-api-key',
   base_url: 'https://your-instance.com/api/json'
 )
@@ -48,7 +48,7 @@ client = Xkpester::Client.new(
 ### Users
 
 ```ruby
-client = Xkpester::Client.new
+client = Xkepster::Client.new
 
 # List users
 users = client.users.list
@@ -219,18 +219,18 @@ Xkepster can send webhooks for OTP delivery (SMS) and magic link delivery (email
 
 ```ruby
 # Configure webhook secret (same as configured in your Xkepster realm)
-Xkpester.configure do |config|
+Xkepster.configure do |config|
   config.webhook_secret = ENV['XKEPSTER_WEBHOOK_SECRET']
 end
 
 # Or create a webhook instance with a specific secret
-webhook = Xkpester::Webhook.new(webhook_secret: 'your-webhook-secret')
+webhook = Xkepster::Webhook.new(webhook_secret: 'your-webhook-secret')
 ```
 
 #### Verifying webhook signatures
 
 ```ruby
-webhook = Xkpester::Webhook.new
+webhook = Xkepster::Webhook.new
 
 # In your webhook endpoint (e.g., Rails controller)
 def handle_webhook
@@ -273,9 +273,9 @@ def handle_otp_webhook
     Rails.logger.info "OTP #{otp_data[:code]} sent to #{otp_data[:recipient]}"
     
     render status: :ok, json: { received: true }
-  rescue Xkpester::WebhookVerificationError => e
+  rescue Xkepster::WebhookVerificationError => e
     render status: :unauthorized, json: { error: e.message }
-  rescue Xkpester::InvalidWebhookError => e
+  rescue Xkepster::InvalidWebhookError => e
     render status: :bad_request, json: { error: e.message }
   end
 end
@@ -305,9 +305,9 @@ def handle_magic_link_webhook
     Rails.logger.info "Magic link sent to #{link_data[:recipient]}"
     
     render status: :ok, json: { received: true }
-  rescue Xkpester::WebhookVerificationError => e
+  rescue Xkepster::WebhookVerificationError => e
     render status: :unauthorized, json: { error: e.message }
-  rescue Xkpester::InvalidWebhookError => e
+  rescue Xkepster::InvalidWebhookError => e
     render status: :bad_request, json: { error: e.message }
   end
 end
@@ -325,10 +325,10 @@ def handle_webhook
     payload = webhook.verify_and_parse(signature, body)
     
     case payload['type']
-    when Xkpester::Webhook::OTP_EVENT
+    when Xkepster::Webhook::OTP_EVENT
       # Handle OTP delivery
       handle_otp_delivery(payload)
-    when Xkpester::Webhook::MAGIC_LINK_EVENT
+    when Xkepster::Webhook::MAGIC_LINK_EVENT
       # Handle magic link delivery
       handle_magic_link_delivery(payload)
     else
@@ -336,9 +336,9 @@ def handle_webhook
     end
     
     render status: :ok, json: { received: true }
-  rescue Xkpester::WebhookVerificationError => e
+  rescue Xkepster::WebhookVerificationError => e
     render status: :unauthorized, json: { error: e.message }
-  rescue Xkpester::InvalidWebhookError => e
+  rescue Xkepster::InvalidWebhookError => e
     render status: :bad_request, json: { error: e.message }
   end
 end
@@ -359,29 +359,29 @@ The client provides specific exception types for different error scenarios:
 ```ruby
 begin
   client.users.retrieve("non-existent-uuid")
-rescue Xkpester::NotFoundError => e
+rescue Xkepster::NotFoundError => e
   puts "User not found: #{e.message}"
   puts "HTTP status: #{e.status}"
-rescue Xkpester::AuthenticationError => e
+rescue Xkepster::AuthenticationError => e
   puts "Authentication failed: #{e.message}"
-rescue Xkpester::ValidationError => e
+rescue Xkepster::ValidationError => e
   puts "Validation error: #{e.message}"
   puts "Details: #{e.details}"
-rescue Xkpester::RateLimitError => e
+rescue Xkepster::RateLimitError => e
   puts "Rate limited: #{e.message}"
-rescue Xkpester::ServerError => e
+rescue Xkepster::ServerError => e
   puts "Server error: #{e.message}"
-rescue Xkpester::ConnectionError => e
+rescue Xkepster::ConnectionError => e
   puts "Connection failed: #{e.message}"
-rescue Xkpester::TimeoutError => e
+rescue Xkepster::TimeoutError => e
   puts "Request timed out: #{e.message}"
-rescue Xkpester::ResponseParsingError => e
+rescue Xkepster::ResponseParsingError => e
   puts "Failed to parse response: #{e.message}"
-rescue Xkpester::WebhookVerificationError => e
+rescue Xkepster::WebhookVerificationError => e
   puts "Webhook verification failed: #{e.message}"
-rescue Xkpester::InvalidWebhookError => e
+rescue Xkepster::InvalidWebhookError => e
   puts "Invalid webhook payload: #{e.message}"
-rescue Xkpester::ApiError => e
+rescue Xkepster::ApiError => e
   puts "API error: #{e.message}"
 end
 ```
@@ -400,17 +400,17 @@ export XKEPSTER_LOG_LEVEL=debug  # Options: debug, info, warn, error, fatal
 #### Enable logging via global configuration
 
 ```ruby
-Xkpester.configure do |config|
+Xkepster.configure do |config|
   config.logging_enabled = true
   config.log_level = :debug
-  config.log_output = File.open('xkpester.log', 'a')  # Optional: log to file instead of stdout
+  config.log_output = File.open('xkepster.log', 'a')  # Optional: log to file instead of stdout
 end
 ```
 
 #### Enable logging per client instance
 
 ```ruby
-client = Xkpester::Client.new(
+client = Xkepster::Client.new(
   api_key: 'your-api-key',
   logging_enabled: true,
   log_level: :debug
@@ -433,9 +433,9 @@ The logger automatically captures:
 #### Example log output
 
 ```
-[2025-11-20 10:30:45] INFO -- xkpester-ruby: API Request: POST /users | Body: {"email"=>"user@example.com", "password"=>"[REDACTED]"}
-[2025-11-20 10:30:46] INFO -- xkpester-ruby: API Response: POST /users | Status: 201 | Duration: 0.523s | Body: {"id"=>123, "email"=>"user@example.com"}
-[2025-11-20 10:30:50] ERROR -- xkpester-ruby: API Error: Faraday::TimeoutError - execution expired | POST /users
+[2025-11-20 10:30:45] INFO -- xkepster-ruby: API Request: POST /users | Body: {"email"=>"user@example.com", "password"=>"[REDACTED]"}
+[2025-11-20 10:30:46] INFO -- xkepster-ruby: API Response: POST /users | Status: 201 | Duration: 0.523s | Body: {"id"=>123, "email"=>"user@example.com"}
+[2025-11-20 10:30:50] ERROR -- xkepster-ruby: API Error: Faraday::TimeoutError - execution expired | POST /users
 ```
 
 ### Environment Variables
@@ -518,14 +518,14 @@ You can also run `bin/console` for an interactive prompt that will allow you to 
 
 ```ruby
 # In bin/console
-Xkpester.configure { |c| c.api_key = "your-test-key" }
-client = Xkpester::Client.new
+Xkepster.configure { |c| c.api_key = "your-test-key" }
+client = Xkepster::Client.new
 # Try out the API...
 ```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/techshelter/xkpester-ruby.
+Bug reports and pull requests are welcome on GitHub at https://github.com/techshelter/xkepster-ruby.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)

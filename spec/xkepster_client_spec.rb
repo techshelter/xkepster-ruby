@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Xkpester::Client do
+RSpec.describe Xkepster::Client do
   let(:api_key) { "test_key" }
   let(:client) { described_class.new(api_key: api_key, base_url: "https://api.xkepster.com") }
 
@@ -18,37 +18,37 @@ RSpec.describe Xkpester::Client do
 
   describe "#users" do
     it "returns a Users resource" do
-      expect(client.users).to be_a(Xkpester::Resources::Users)
+      expect(client.users).to be_a(Xkepster::Resources::Users)
     end
   end
 
   describe "#groups" do
     it "returns a Groups resource" do
-      expect(client.groups).to be_a(Xkpester::Resources::Groups)
+      expect(client.groups).to be_a(Xkepster::Resources::Groups)
     end
   end
 
   describe "#sms_auth" do
     it "returns a SmsAuth resource" do
-      expect(client.sms_auth).to be_a(Xkpester::Resources::SmsAuth)
+      expect(client.sms_auth).to be_a(Xkepster::Resources::SmsAuth)
     end
   end
 
   describe "#email_auth" do
     it "returns an EmailAuth resource" do
-      expect(client.email_auth).to be_a(Xkpester::Resources::EmailAuth)
+      expect(client.email_auth).to be_a(Xkepster::Resources::EmailAuth)
     end
   end
 
   describe "#sessions" do
     it "returns a Sessions resource" do
-      expect(client.sessions).to be_a(Xkpester::Resources::Sessions)
+      expect(client.sessions).to be_a(Xkepster::Resources::Sessions)
     end
   end
 
   describe "#tokens" do
     it "returns a Tokens resource" do
-      expect(client.tokens).to be_a(Xkpester::Resources::Tokens)
+      expect(client.tokens).to be_a(Xkepster::Resources::Tokens)
     end
   end
 
@@ -74,7 +74,7 @@ RSpec.describe Xkpester::Client do
     it "raises AuthenticationError when API key is missing" do
       client = described_class.new(api_key: nil)
       
-      expect { client.users.list }.to raise_error(Xkpester::AuthenticationError, /API key is missing/)
+      expect { client.users.list }.to raise_error(Xkepster::AuthenticationError, /API key is missing/)
     end
   end
 end

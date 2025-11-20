@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Xkpester
+module Xkepster
   Error = Class.new(StandardError)
 
   ApiError = Class.new(Error)

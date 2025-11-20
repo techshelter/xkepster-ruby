@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require_relative "lib/xkpester/version"
+require_relative "lib/xkepster/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "xkpester-ruby"
-  spec.version = Xkpester::VERSION
+  spec.name = "xkepster-ruby"
+  spec.version = Xkepster::VERSION
   spec.authors = ["yanovitchsky"]
   spec.email = ["yannakoun@gmail.com"]
 
   spec.summary = "Ruby client for the Xkepster authentication platform"
   spec.description = "A Ruby client library for Xkepster, providing user management, authentication (SMS and email), session handling, and token management APIs."
-  spec.homepage = "https://github.com/techshelter/xkpester-ruby"
+  spec.homepage = "https://github.com/techshelter/xkepster-ruby"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
 

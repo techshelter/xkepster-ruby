@@ -2,7 +2,7 @@
 
 require "openssl"
 
-module Xkpester
+module Xkepster
   class Webhook
     # Webhook event types from the API specification
     OTP_EVENT = "otp"
@@ -11,7 +11,7 @@ module Xkpester
     attr_reader :webhook_secret
 
     def initialize(webhook_secret: nil)
-      @webhook_secret = webhook_secret || Xkpester.config.webhook_secret
+      @webhook_secret = webhook_secret || Xkepster.config.webhook_secret
     end
 
     # Verifies webhook signature using HMAC-SHA256

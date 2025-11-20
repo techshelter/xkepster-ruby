@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Xkpester
+module Xkepster
   class Configuration
     attr_accessor :api_key, :base_url, :timeout, :open_timeout, :adapter, :logger, :user_agent, :webhook_secret,
                   :log_level, :log_output, :logging_enabled
@@ -15,12 +15,12 @@ module Xkpester
       @log_level = ENV.fetch("XKEPSTER_LOG_LEVEL", "info").to_sym
       @log_output = $stdout
       @logging_enabled = ENV.fetch("XKEPSTER_LOGGING_ENABLED", "false") == "true"
-      @user_agent = "xkpester-ruby #{Xkpester::VERSION} Ruby #{RUBY_VERSION}"
+      @user_agent = "xkepster-ruby #{Xkepster::VERSION} Ruby #{RUBY_VERSION}"
       @webhook_secret = ENV["XKEPSTER_WEBHOOK_SECRET"]
     end
 
     def inspect
-      "#<Xkpester::Configuration:#{object_id} " \
+      "#<Xkepster::Configuration:#{object_id} " \
         "api_key=[REDACTED] " \
         "base_url=#{@base_url.inspect} " \
         "timeout=#{@timeout.inspect} " \

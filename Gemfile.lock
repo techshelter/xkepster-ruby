@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    xkpester-ruby (0.1.0)
+    xkepster-ruby (0.1.0)
       faraday (~> 2.8)
       json (~> 2.6)
 
@@ -108,7 +108,7 @@ DEPENDENCIES
   rspec (~> 3.12, ~> 3.0)
   rubocop (~> 1.21)
   webmock (~> 3.18)
-  xkpester-ruby!
+  xkepster-ruby!
 
 BUNDLED WITH
    2.7.1

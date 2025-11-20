@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Xkpester
+module Xkepster
   module Resources
     class SmsAuth < Base
       def register(phone_number:, group_id:)

@@ -2,7 +2,7 @@
 
 require "logger"
 
-module Xkpester
+module Xkepster
   class Logger
     LEVELS = {
       debug: ::Logger::DEBUG,
@@ -19,7 +19,7 @@ module Xkpester
       @logger = ::Logger.new(output)
       @logger.level = LEVELS[level] || ::Logger::INFO
       @logger.formatter = proc do |severity, datetime, progname, msg|
-        "[#{datetime.strftime('%Y-%m-%d %H:%M:%S')}] #{severity} -- xkpester-ruby: #{msg}\n"
+        "[#{datetime.strftime('%Y-%m-%d %H:%M:%S')}] #{severity} -- xkepster-ruby: #{msg}\n"
       end
     end
 
