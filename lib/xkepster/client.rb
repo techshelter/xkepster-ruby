@@ -90,7 +90,7 @@ module Xkepster
 
       xkepster_logger.log_request(method, path, params: params, body: body, headers: headers)
 
-      response = connection.run_request(method, path, body && JSON.dump(body),
+      response = connection.run_request(method, path, body,
                                         default_headers.merge(headers || {})) do |req|
         req.params.update(params) if params && !params.empty?
       end
