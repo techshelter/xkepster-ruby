@@ -1,6 +1,6 @@
 # Xkpester Ruby Client
 
-A Ruby client library for the [Xkepster authentication platform](https://github.com/techshelter/xkepster). Provides comprehensive user management, authentication (SMS and email), session handling, and token management APIs.
+A Ruby client library for the [Xkepster authentication platform](https://github.com/techshelter/xkepster). Provides comprehensive user management, authentication (SMS and email), session handling, token management APIs, and webhook verification.
 
 ## Installation
 
@@ -28,6 +28,7 @@ require 'xkpester'
 Xkpester.configure do |config|
   config.api_key = ENV['XKEPSTER_API_KEY']  # Required: Your realm API key
   config.base_url = ENV['XKEPSTER_BASE_URL'] || 'https://your-xkepster-instance.com/api/json'
+  config.webhook_secret = ENV['XKEPSTER_WEBHOOK_SECRET']  # Required for webhook verification
   config.timeout = 30
   config.open_timeout = 5
 end
@@ -210,6 +211,147 @@ rotated = client.tokens.rotate("token-uuid")
 client.tokens.revoke("token-uuid")
 ```
 
+### Webhooks
+
+Xkepster can send webhooks for OTP delivery (SMS) and magic link delivery (email) events. The webhook functionality provides secure signature verification using HMAC-SHA256.
+
+#### Setting up webhook verification
+
+```ruby
+# Configure webhook secret (same as configured in your Xkepster realm)
+Xkpester.configure do |config|
+  config.webhook_secret = ENV['XKEPSTER_WEBHOOK_SECRET']
+end
+
+# Or create a webhook instance with a specific secret
+webhook = Xkpester::Webhook.new(webhook_secret: 'your-webhook-secret')
+```
+
+#### Verifying webhook signatures
+
+```ruby
+webhook = Xkpester::Webhook.new
+
+# In your webhook endpoint (e.g., Rails controller)
+def handle_webhook
+  signature = request.headers['X-Webhook-Signature']
+  body = request.raw_post
+  
+  # Verify the signature
+  unless webhook.verify_signature(signature, body)
+    render status: :unauthorized, json: { error: 'Invalid signature' }
+    return
+  end
+  
+  # Process the webhook payload
+  payload = JSON.parse(body)
+  # ... handle the webhook event
+end
+```
+
+#### Parsing OTP delivery webhooks
+
+```ruby
+# For SMS OTP delivery notifications
+def handle_otp_webhook
+  signature = request.headers['X-Webhook-Signature']
+  body = request.raw_post
+  
+  begin
+    otp_data = webhook.parse_otp_webhook(signature, body)
+    
+    # otp_data contains:
+    # {
+    #   type: "otp",
+    #   recipient: "+1234567890",
+    #   code: "123456",
+    #   tenant: "your-tenant-id",
+    #   timestamp: 1700000000
+    # }
+    
+    # Log or process the OTP delivery
+    Rails.logger.info "OTP #{otp_data[:code]} sent to #{otp_data[:recipient]}"
+    
+    render status: :ok, json: { received: true }
+  rescue Xkpester::WebhookVerificationError => e
+    render status: :unauthorized, json: { error: e.message }
+  rescue Xkpester::InvalidWebhookError => e
+    render status: :bad_request, json: { error: e.message }
+  end
+end
+```
+
+#### Parsing magic link delivery webhooks
+
+```ruby
+# For email magic link delivery notifications
+def handle_magic_link_webhook
+  signature = request.headers['X-Webhook-Signature']
+  body = request.raw_post
+  
+  begin
+    link_data = webhook.parse_magic_link_webhook(signature, body)
+    
+    # link_data contains:
+    # {
+    #   type: "magic_link",
+    #   recipient: "user@example.com",
+    #   link: "https://your-app.com/auth/magic?token=abc123",
+    #   tenant: "your-tenant-id",
+    #   timestamp: 1700000000
+    # }
+    
+    # Log or process the magic link delivery
+    Rails.logger.info "Magic link sent to #{link_data[:recipient]}"
+    
+    render status: :ok, json: { received: true }
+  rescue Xkpester::WebhookVerificationError => e
+    render status: :unauthorized, json: { error: e.message }
+  rescue Xkpester::InvalidWebhookError => e
+    render status: :bad_request, json: { error: e.message }
+  end
+end
+```
+
+#### Generic webhook parsing
+
+```ruby
+# For handling any webhook type generically
+def handle_webhook
+  signature = request.headers['X-Webhook-Signature']
+  body = request.raw_post
+  
+  begin
+    payload = webhook.verify_and_parse(signature, body)
+    
+    case payload['type']
+    when Xkpester::Webhook::OTP_EVENT
+      # Handle OTP delivery
+      handle_otp_delivery(payload)
+    when Xkpester::Webhook::MAGIC_LINK_EVENT
+      # Handle magic link delivery
+      handle_magic_link_delivery(payload)
+    else
+      Rails.logger.warn "Unknown webhook type: #{payload['type']}"
+    end
+    
+    render status: :ok, json: { received: true }
+  rescue Xkpester::WebhookVerificationError => e
+    render status: :unauthorized, json: { error: e.message }
+  rescue Xkpester::InvalidWebhookError => e
+    render status: :bad_request, json: { error: e.message }
+  end
+end
+```
+
+#### Webhook security
+
+- All webhooks are signed using HMAC-SHA256 with your realm's webhook secret
+- Signatures are provided in the `X-Webhook-Signature` header
+- The library uses constant-time comparison to prevent timing attacks
+- Always verify signatures before processing webhook payloads
+- Webhook secrets should be stored securely (e.g., environment variables)
+
 ### Error Handling
 
 The client provides specific exception types for different error scenarios:
@@ -235,6 +377,10 @@ rescue Xkpester::TimeoutError => e
   puts "Request timed out: #{e.message}"
 rescue Xkpester::ResponseParsingError => e
   puts "Failed to parse response: #{e.message}"
+rescue Xkpester::WebhookVerificationError => e
+  puts "Webhook verification failed: #{e.message}"
+rescue Xkpester::InvalidWebhookError => e
+  puts "Invalid webhook payload: #{e.message}"
 rescue Xkpester::ApiError => e
   puts "API error: #{e.message}"
 end
@@ -246,6 +392,7 @@ The client can be configured using environment variables:
 
 - `XKEPSTER_API_KEY` - Your realm API key
 - `XKEPSTER_BASE_URL` - Base URL for the Xkepster API (defaults to https://api.xkepster.com)
+- `XKEPSTER_WEBHOOK_SECRET` - Webhook secret for signature verification
 - `XKEPSTER_TIMEOUT` - Request timeout in seconds (default: 30)
 - `XKEPSTER_OPEN_TIMEOUT` - Connection timeout in seconds (default: 5)
 

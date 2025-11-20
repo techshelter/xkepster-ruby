@@ -15,6 +15,7 @@ require_relative "xkpester/resources/sms_auth"
 require_relative "xkpester/resources/email_auth"
 require_relative "xkpester/resources/sessions"
 require_relative "xkpester/resources/tokens"
+require_relative "xkpester/webhook"
 
 module Xkpester
   class << self

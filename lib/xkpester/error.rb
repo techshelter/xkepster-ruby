@@ -12,6 +12,8 @@ module Xkpester
   ConnectionError = Class.new(Error)
   TimeoutError = Class.new(Error)
   ResponseParsingError = Class.new(Error)
+  WebhookVerificationError = Class.new(Error)
+  InvalidWebhookError = Class.new(Error)
 
   class ApiError
     attr_reader :status, :code, :details

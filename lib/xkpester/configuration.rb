@@ -2,7 +2,7 @@
 
 module Xkpester
   class Configuration
-    attr_accessor :api_key, :base_url, :timeout, :open_timeout, :adapter, :logger, :user_agent
+    attr_accessor :api_key, :base_url, :timeout, :open_timeout, :adapter, :logger, :user_agent, :webhook_secret
 
     def initialize
       @api_key       = ENV["XKEPSTER_API_KEY"]
@@ -12,6 +12,7 @@ module Xkpester
       @adapter       = Faraday.default_adapter
       @logger        = nil
       @user_agent    = "xkpester-ruby #{Xkpester::VERSION} Ruby #{RUBY_VERSION}"
+      @webhook_secret = ENV["XKEPSTER_WEBHOOK_SECRET"]
     end
   end
 end
