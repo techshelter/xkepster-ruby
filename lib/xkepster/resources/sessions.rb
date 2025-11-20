@@ -4,7 +4,7 @@ module Xkepster
   module Resources
     class Sessions < Base
       def list(params = {})
-        client.get("/sessions", params: params)
+        client.get("sessions", params: params)
       end
 
       def create(user_id:, ip_address: nil, user_agent: nil, device_name: nil)
@@ -21,11 +21,11 @@ module Xkepster
             }
           }
         }
-        client.post("/sessions", body: payload)
+        client.post("sessions", body: payload)
       end
 
       def retrieve(session_id)
-        client.get("/sessions/#{session_id}")
+        client.get("sessions/#{session_id}")
       end
 
       def revoke(session_id)
@@ -36,7 +36,7 @@ module Xkepster
             attributes: { active: false }
           }
         }
-        client.patch("/sessions/#{session_id}", body: payload)
+        client.patch("sessions/#{session_id}", body: payload)
       end
 
       def update_activity(session_id)
@@ -47,7 +47,7 @@ module Xkepster
             attributes: {}
           }
         }
-        client.patch("/sessions/#{session_id}", body: payload)
+        client.patch("sessions/#{session_id}", body: payload)
       end
     end
   end

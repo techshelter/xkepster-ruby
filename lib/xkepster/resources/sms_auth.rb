@@ -13,7 +13,7 @@ module Xkepster
             }
           }
         }
-        client.post("/sms_auths", body: payload)
+        client.post("sms_auths", body: payload)
       end
 
       def verify_otp(sms_auth_id:, otp:, user_params: {})
@@ -27,7 +27,7 @@ module Xkepster
             }
           }
         }
-        client.patch("/sms_auths/#{sms_auth_id}", body: payload)
+        client.patch("sms_auths/#{sms_auth_id}", body: payload)
       end
 
       def resend_otp(sms_auth_id)
@@ -38,7 +38,7 @@ module Xkepster
             attributes: {}
           }
         }
-        client.patch("/sms_auths/#{sms_auth_id}", body: payload)
+        client.patch("sms_auths/#{sms_auth_id}", body: payload)
       end
     end
   end

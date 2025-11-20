@@ -4,7 +4,7 @@ module Xkepster
   module Resources
     class Tokens < Base
       def list(params = {})
-        client.get("/tokens", params: params)
+        client.get("tokens", params: params)
       end
 
       def create(user_id:, expires_at: nil)
@@ -19,7 +19,7 @@ module Xkepster
             }
           }
         }
-        client.post("/tokens", body: payload)
+        client.post("tokens", body: payload)
       end
 
       def rotate(token_id)
@@ -30,7 +30,7 @@ module Xkepster
             attributes: {}
           }
         }
-        client.patch("/tokens/#{token_id}", body: payload)
+        client.patch("tokens/#{token_id}", body: payload)
       end
 
       def revoke(token_id)
@@ -41,7 +41,7 @@ module Xkepster
             attributes: { revoked: true }
           }
         }
-        client.patch("/tokens/#{token_id}", body: payload)
+        client.patch("tokens/#{token_id}", body: payload)
       end
     end
   end
