@@ -39,6 +39,10 @@ module Xkpester
       @tokens ||= Resources::Tokens.new(self)
     end
 
+    def inspect
+      "#<Xkpester::Client:#{object_id} config=#{config.inspect}>"
+    end
+
     def get(path, params: {}, headers: {})
       request(:get, path, params: params, headers: headers)
     end

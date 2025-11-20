@@ -14,5 +14,17 @@ module Xkpester
       @user_agent    = "xkpester-ruby #{Xkpester::VERSION} Ruby #{RUBY_VERSION}"
       @webhook_secret = ENV["XKEPSTER_WEBHOOK_SECRET"]
     end
+
+    def inspect
+      "#<Xkpester::Configuration:#{object_id} " \
+        "api_key=[REDACTED] " \
+        "base_url=#{@base_url.inspect} " \
+        "timeout=#{@timeout.inspect} " \
+        "open_timeout=#{@open_timeout.inspect} " \
+        "adapter=#{@adapter.inspect} " \
+        "logger=#{@logger.inspect} " \
+        "user_agent=#{@user_agent.inspect} " \
+        "webhook_secret=[REDACTED]>"
+    end
   end
 end
