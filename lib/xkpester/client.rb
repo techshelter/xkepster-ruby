@@ -4,7 +4,8 @@ module Xkpester
   class Client
     attr_reader :config
 
-    def initialize(api_key: nil, base_url: nil, timeout: nil, open_timeout: nil, adapter: nil, logger: nil, user_agent: nil)
+    def initialize(api_key: nil, base_url: nil, timeout: nil, open_timeout: nil, adapter: nil, logger: nil,
+                   user_agent: nil, log_level: nil, logging_enabled: nil)
       @config = Xkpester.config.dup
       @config.api_key = api_key if api_key
       @config.base_url = base_url if base_url
@@ -13,6 +14,9 @@ module Xkpester
       @config.adapter = adapter if adapter
       @config.logger = logger if logger
       @config.user_agent = user_agent if user_agent
+      @config.log_level = log_level if log_level
+      @config.logging_enabled = logging_enabled unless logging_enabled.nil?
+      @xkpester_logger = nil
     end
 
     def users
@@ -66,30 +70,49 @@ module Xkpester
         f.options.timeout = config.timeout
         f.options.open_timeout = config.open_timeout
         f.adapter config.adapter
-        if config.logger
-          f.response :logger, config.logger, headers: false, bodies: false
-        end
+        f.response :logger, config.logger, headers: false, bodies: false if config.logger
       end
     end
 
     private
 
+    def xkpester_logger
+      @xkpester_logger ||= Xkpester::Logger.new(
+        output: config.log_output,
+        level: config.log_level,
+        enabled: config.logging_enabled
+      )
+    end
+
     def request(method, path, body: nil, params: nil, headers: nil)
       ensure_api_key!
-      response = connection.run_request(method, path, body && JSON.dump(body), default_headers.merge(headers || {})) do |req|
+      start_time = Time.now
+
+      xkpester_logger.log_request(method, path, params: params, body: body, headers: headers)
+
+      response = connection.run_request(method, path, body && JSON.dump(body),
+                                        default_headers.merge(headers || {})) do |req|
         req.params.update(params) if params && !params.empty?
       end
+
+      duration = Time.now - start_time
+      xkpester_logger.log_response(method, path, status: response.status, body: response.body, duration: duration)
+
       handle_response(response)
     rescue Faraday::TimeoutError => e
+      xkpester_logger.log_error(e, method: method, path: path)
       raise TimeoutError, e.message
     rescue Faraday::ConnectionFailed => e
+      xkpester_logger.log_error(e, method: method, path: path)
       raise ConnectionError, e.message
     rescue Faraday::Error => e
+      xkpester_logger.log_error(e, method: method, path: path)
       raise ConnectionError, e.message
     end
 
     def ensure_api_key!
       return if config.api_key && !config.api_key.to_s.strip.empty?
+
       raise AuthenticationError.new("API key is missing. Set XKEPSTER_API_KEY or configure Xkpester.config.api_key")
     end
 
@@ -130,6 +153,7 @@ module Xkpester
     def parse_body(body)
       return nil if body.nil? || body == ""
       return body if body.is_a?(Hash) || body.is_a?(Array)
+
       JSON.parse(body)
     rescue JSON::ParserError => e
       raise ResponseParsingError, e.message
@@ -137,6 +161,7 @@ module Xkpester
 
     def message_from(parsed)
       return "Request failed" unless parsed.is_a?(Hash)
+
       parsed["message"] || parsed["error"] || "Request failed"
     end
   end

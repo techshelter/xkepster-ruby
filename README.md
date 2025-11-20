@@ -386,6 +386,58 @@ rescue Xkpester::ApiError => e
 end
 ```
 
+### Logging
+
+The client includes comprehensive logging capabilities to help debug API interactions. Logging can be configured globally or per-client instance.
+
+#### Enable logging via environment variables
+
+```bash
+export XKEPSTER_LOGGING_ENABLED=true
+export XKEPSTER_LOG_LEVEL=debug  # Options: debug, info, warn, error, fatal
+```
+
+#### Enable logging via global configuration
+
+```ruby
+Xkpester.configure do |config|
+  config.logging_enabled = true
+  config.log_level = :debug
+  config.log_output = File.open('xkpester.log', 'a')  # Optional: log to file instead of stdout
+end
+```
+
+#### Enable logging per client instance
+
+```ruby
+client = Xkpester::Client.new(
+  api_key: 'your-api-key',
+  logging_enabled: true,
+  log_level: :debug
+)
+```
+
+#### What gets logged
+
+The logger automatically captures:
+- **API Requests**: HTTP method, endpoint, parameters, request body
+- **API Responses**: HTTP status code, response body, request duration
+- **Errors**: Connection failures, timeouts, and API errors with context
+
+#### Security features
+
+- Automatically redacts sensitive fields (passwords, tokens, api_keys, secrets, etc.)
+- Sanitizes long header values to prevent log pollution
+- Uses structured, timestamped log format
+
+#### Example log output
+
+```
+[2025-11-20 10:30:45] INFO -- xkpester-ruby: API Request: POST /users | Body: {"email"=>"user@example.com", "password"=>"[REDACTED]"}
+[2025-11-20 10:30:46] INFO -- xkpester-ruby: API Response: POST /users | Status: 201 | Duration: 0.523s | Body: {"id"=>123, "email"=>"user@example.com"}
+[2025-11-20 10:30:50] ERROR -- xkpester-ruby: API Error: Faraday::TimeoutError - execution expired | POST /users
+```
+
 ### Environment Variables
 
 The client can be configured using environment variables:
@@ -395,6 +447,8 @@ The client can be configured using environment variables:
 - `XKEPSTER_WEBHOOK_SECRET` - Webhook secret for signature verification
 - `XKEPSTER_TIMEOUT` - Request timeout in seconds (default: 30)
 - `XKEPSTER_OPEN_TIMEOUT` - Connection timeout in seconds (default: 5)
+- `XKEPSTER_LOGGING_ENABLED` - Enable detailed logging (default: false)
+- `XKEPSTER_LOG_LEVEL` - Log level: debug, info, warn, error, fatal (default: info)
 
 ## JSON:API Format
 

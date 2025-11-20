@@ -6,6 +6,7 @@ require "faraday"
 require_relative "xkpester/version"
 require_relative "xkpester/configuration"
 require_relative "xkpester/error"
+require_relative "xkpester/logger"
 require_relative "xkpester/client"
 
 require_relative "xkpester/resources/base"
