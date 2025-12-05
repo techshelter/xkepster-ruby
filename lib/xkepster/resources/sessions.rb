@@ -3,29 +3,14 @@
 module Xkepster
   module Resources
     class Sessions < Base
-      def list(params = {})
+      def list(params = {}, fields: nil, field_inputs: nil)
+        params = add_fields_and_inputs(params, :sessions, fields: fields, field_inputs: field_inputs)
         client.get("sessions", params: params)
       end
 
-      def create(user_id:, ip_address: nil, user_agent: nil, device_name: nil)
-        payload = {
-          data: {
-            type: "sessions",
-            attributes: {
-              ip_address: ip_address,
-              user_agent: user_agent,
-              device_name: device_name
-            }.compact,
-            relationships: {
-              user: { data: { type: "users", id: user_id } }
-            }
-          }
-        }
-        client.post("sessions", body: payload)
-      end
-
-      def retrieve(session_id)
-        client.get("sessions/#{session_id}")
+      def retrieve(session_id, fields: nil, field_inputs: nil)
+        params = add_fields_and_inputs({}, :sessions, fields: fields, field_inputs: field_inputs)
+        client.get("sessions/#{session_id}", params: params)
       end
 
       def revoke(session_id)

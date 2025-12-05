@@ -3,23 +3,9 @@
 module Xkepster
   module Resources
     class Tokens < Base
-      def list(params = {})
+      def list(params = {}, fields: nil, field_inputs: nil)
+        params = add_fields_and_inputs(params, :tokens, fields: fields, field_inputs: field_inputs)
         client.get("tokens", params: params)
-      end
-
-      def create(user_id:, expires_at: nil)
-        payload = {
-          data: {
-            type: "tokens",
-            attributes: {
-              expires_at: expires_at
-            }.compact,
-            relationships: {
-              user: { data: { type: "users", id: user_id } }
-            }
-          }
-        }
-        client.post("tokens", body: payload)
       end
 
       def rotate(token_id)
