@@ -5,7 +5,7 @@ module Xkepster
     attr_reader :config
 
     def initialize(api_key: nil, base_url: nil, timeout: nil, open_timeout: nil, adapter: nil, logger: nil,
-                   user_agent: nil, log_level: nil, logging_enabled: nil)
+                   user_agent: nil, log_level: nil, logging_enabled: nil, machine_token: nil)
       @config = Xkepster.config.dup
       @config.api_key = api_key if api_key
       @config.base_url = base_url if base_url
@@ -16,6 +16,7 @@ module Xkepster
       @config.user_agent = user_agent if user_agent
       @config.log_level = log_level if log_level
       @config.logging_enabled = logging_enabled unless logging_enabled.nil?
+      @config.machine_token = machine_token if machine_token
       @xkepster_logger = nil
     end
 
@@ -41,6 +42,18 @@ module Xkepster
 
     def tokens
       @tokens ||= Resources::Tokens.new(self)
+    end
+
+    def operation_tokens
+      @operation_tokens ||= Resources::OperationTokens.new(self)
+    end
+
+    def audit_logs
+      @audit_logs ||= Resources::AuditLogs.new(self)
+    end
+
+    def realm
+      @realm ||= Resources::Realm.new(self)
     end
 
     def inspect
@@ -102,7 +115,10 @@ module Xkepster
     rescue Faraday::TimeoutError => e
       xkepster_logger.log_error(e, method: method, path: path)
       raise TimeoutError, e.message
-    rescue Faraday::ConnectionFailed => e
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ETIMEDOUT, SocketError => e
+      xkepster_logger.log_error(e, method: method, path: path)
+      raise ConnectionError, e.message
+    rescue Faraday::ConnectionFailed, Faraday::SSLError => e
       xkepster_logger.log_error(e, method: method, path: path)
       raise ConnectionError, e.message
     rescue Faraday::Error => e
@@ -117,12 +133,14 @@ module Xkepster
     end
 
     def default_headers
-      {
+      headers = {
         "X-Kepster-Key" => config.api_key,
         "Content-Type" => "application/vnd.api+json",
         "Accept" => "application/vnd.api+json",
         "User-Agent" => config.user_agent
       }
+      headers["X-Machine-Token"] = config.machine_token if config.machine_token
+      headers
     end
 
     def handle_response(response)
