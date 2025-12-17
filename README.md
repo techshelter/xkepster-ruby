@@ -53,36 +53,69 @@ client = Xkepster::Client.new
 # List users
 users = client.users.list
 
-# Create a user
-user_payload = {
-  data: {
-    type: "users",
-    attributes: {
-      first_name: "John",
-      last_name: "Doe",
-      role: "user",
-      custom_fields: {
-        department: "Engineering"
-      }
+# List users with specific fields (sparse fieldsets)
+users = client.users.list(fields: ["first_name", "last_name", "email"])
+users = client.users.list(fields: "first_name,last_name")  # String format
+users = client.users.list(fields: { users: "first_name,last_name" })  # Hash format
+
+# List users with field inputs for calculations
+users = client.users.list(
+  fields: ["first_name", "monthly_engagement"],
+  field_inputs: {
+    users: {
+      monthly_engagement: { yyyy_mm: "2024.06" }
     }
   }
-}
-user = client.users.create(user_payload)
+)
+
+# List users with pagination and fields
+users = client.users.list({ page: 1, per_page: 20 }, fields: ["first_name", "last_name"])
+
+# Create a user
+user = client.users.create(
+  first_name: "John",
+  last_name: "Doe",
+  email: "john@example.com",
+  phone_number: "+1234567890",
+  role: "user",
+  custom_fields: { department: "Engineering" },
+  group_ids: ["group-uuid-1", "group-uuid-2"]
+)
 
 # Get a user
 user = client.users.retrieve("user-uuid")
 
-# Update a user
-update_payload = {
-  data: {
-    type: "users",
-    id: "user-uuid",
-    attributes: {
-      first_name: "Jane"
+# Get a user with specific fields
+user = client.users.retrieve("user-uuid", fields: ["first_name", "last_name"])
+
+# Get a user with field inputs
+user = client.users.retrieve(
+  "user-uuid",
+  fields: ["first_name", "quarterly_stats"],
+  field_inputs: {
+    users: {
+      quarterly_stats: { quarter: "Q2", year: "2024" }
     }
   }
-}
-client.users.update("user-uuid", update_payload)
+)
+
+# Update a user
+client.users.update(
+  "user-uuid",
+  first_name: "Jane",
+  last_name: "Smith",
+  role: "admin",
+  group_ids: ["group-uuid-1"]
+)
+
+# Lock a user
+client.users.lock("user-uuid", reason: "Suspicious activity")
+
+# Unlock a user
+client.users.unlock("user-uuid")
+
+# Promote user to admin
+client.users.promote_to_admin("user-uuid")
 
 # Delete a user
 client.users.delete("user-uuid")
@@ -91,28 +124,57 @@ client.users.delete("user-uuid")
 ### Groups
 
 ```ruby
-# List groups
+# List groups (with all attributes by default)
 groups = client.groups.list
 
-# Create a group
-group_payload = {
-  data: {
-    type: "groups",
-    attributes: {
-      name: "Engineering Team",
-      description: "Engineering department members",
-      auth_strategy: "both",  # "sms", "email", or "both"
-      allow_registration: true
+# List groups with specific fields
+groups = client.groups.list(fields: ["name", "description"])
+groups = client.groups.list(fields: "name,description")  # String format
+
+# List groups with field inputs
+groups = client.groups.list(
+  fields: ["name", "monthly_stats"],
+  field_inputs: {
+    groups: {
+      monthly_stats: { yyyy_mm: "2024.06" }
     }
   }
-}
-group = client.groups.create(group_payload)
+)
 
-# Get a group
+# Create a group using simplified syntax
+group = client.groups.create(
+  name: "Engineering Team",
+  description: "Engineering department members",
+  auth_strategy: "both",  # "sms", "email", or "both"
+  allow_registration: true
+)
+
+# Get a group with all attributes (default behavior)
 group = client.groups.retrieve("group-uuid")
+# => {"data" => {"attributes" => {"name" => "...", "description" => "...", ...}}}
+
+# Get specific fields only
+group = client.groups.retrieve("group-uuid", fields: ["name", "description"])
+group = client.groups.retrieve("group-uuid", fields: "name")  # Single field as string
+
+# Get a group with field inputs
+group = client.groups.retrieve(
+  "group-uuid",
+  fields: ["name", "quarterly_stats"],
+  field_inputs: {
+    groups: {
+      quarterly_stats: { quarter: "Q2", year: "2024" }
+    }
+  }
+)
 
 # Update a group
-client.groups.update("group-uuid", update_payload)
+client.groups.update(
+  "group-uuid",
+  name: "Updated Engineering Team",
+  description: "Updated description",
+  allow_registration: false
+)
 
 # Delete a group
 client.groups.delete("group-uuid")
@@ -143,6 +205,13 @@ refresh_token = result['meta']['refresh_token']
 
 # Resend OTP if needed
 client.sms_auth.resend_otp(sms_auth['data']['id'])
+
+# Resend OTP using machine token (for automation/CI/CD)
+machine_client = Xkepster::Client.new(
+  api_key: 'your-api-key',
+  machine_token: 'your-machine-token'
+)
+machine_client.sms_auth.resend_otp(sms_auth['data']['id'])
 ```
 
 ### Email Authentication
@@ -166,7 +235,49 @@ result = client.email_auth.verify_token(
 
 # Resend magic link if needed
 client.email_auth.resend_magic_link(email_auth['data']['id'])
+
+# Resend magic link using machine token (for automation/CI/CD)
+machine_client = Xkepster::Client.new(
+  api_key: 'your-api-key',
+  machine_token: 'your-machine-token'
+)
+machine_client.email_auth.resend_magic_link(email_auth['data']['id'])
 ```
+
+### Machine Tokens
+
+Machine tokens provide long-lived authentication for CI/CD pipelines, integrations, and automation scripts. They can be used to perform admin operations without user authentication.
+
+**Note:** Machine tokens are created via the admin dashboard, not through the API.
+
+```ruby
+# Create a client with machine token
+machine_client = Xkepster::Client.new(
+  api_key: 'your-api-key',
+  machine_token: 'your-machine-token'
+)
+
+# Machine tokens automatically authenticate as admin
+# You can perform any admin operation
+users = machine_client.users.list
+new_user = machine_client.users.create(
+  first_name: "Automated",
+  last_name: "User",
+  role: "user"
+)
+
+# Machine tokens can also resend OTP codes and magic links
+# Useful for automation workflows that trigger authentication webhooks
+machine_client.sms_auth.resend_otp('sms-auth-uuid')
+machine_client.email_auth.resend_magic_link('email-auth-uuid')
+```
+
+**Machine Token Features:**
+- Long-lived (30-365 days, configurable)
+- Reusable (can be used multiple times)
+- Admin-level permissions
+- Tracked (last usage timestamp recorded)
+- Revocable via admin dashboard
 
 ### Sessions
 
@@ -182,8 +293,24 @@ session = client.sessions.create(
 # List sessions
 sessions = client.sessions.list
 
+# List sessions with specific fields
+sessions = client.sessions.list(fields: ["user_id", "ip_address", "created_at"])
+
+# List sessions with field inputs
+sessions = client.sessions.list(
+  fields: ["user_id", "monthly_activity"],
+  field_inputs: {
+    sessions: {
+      monthly_activity: { yyyy_mm: "2024.06" }
+    }
+  }
+)
+
 # Get a session
 session = client.sessions.retrieve("session-uuid")
+
+# Get a session with specific fields
+session = client.sessions.retrieve("session-uuid", fields: ["user_id", "ip_address"])
 
 # Revoke a session
 client.sessions.revoke("session-uuid")
@@ -203,6 +330,19 @@ token = client.tokens.create(
 
 # List tokens
 tokens = client.tokens.list
+
+# List tokens with specific fields
+tokens = client.tokens.list(fields: ["user_id", "expires_at", "created_at"])
+
+# List tokens with field inputs
+tokens = client.tokens.list(
+  fields: ["user_id", "usage_stats"],
+  field_inputs: {
+    tokens: {
+      usage_stats: { period: "month", year: "2024" }
+    }
+  }
+)
 
 # Rotate a token
 rotated = client.tokens.rotate("token-uuid")
@@ -352,6 +492,33 @@ end
 - Always verify signatures before processing webhook payloads
 - Webhook secrets should be stored securely (e.g., environment variables)
 
+#### Troubleshooting webhook verification
+
+**Common error: "Invalid webhook signature"**
+
+This usually happens when:
+
+1. **Using `params` instead of `request.raw_post`**: The signature is computed from the exact raw JSON body string. Rails `params` is already parsed and won't match.
+   ```ruby
+   # ❌ WRONG - This will fail
+   body = params.to_json
+   
+   # ✅ CORRECT - Use raw body
+   body = request.raw_post
+   ```
+
+2. **Body already read**: If you've already read `request.body.read`, you need to rewind it or use `request.raw_post` before any parsing.
+   ```ruby
+   # ✅ CORRECT - Read raw body first
+   body = request.raw_post
+   signature = request.headers['X-Webhook-Signature']
+   webhook.verify_signature(signature, body)
+   ```
+
+3. **Missing or incorrect webhook secret**: Ensure `XKEPSTER_WEBHOOK_SECRET` matches your realm's webhook secret.
+
+4. **Missing signature header**: Check that `X-Webhook-Signature` header is present in the request.
+
 ### Error Handling
 
 The client provides specific exception types for different error scenarios:
@@ -445,6 +612,7 @@ The client can be configured using environment variables:
 - `XKEPSTER_API_KEY` - Your realm API key
 - `XKEPSTER_BASE_URL` - Base URL for the Xkepster API (defaults to https://api.xkepster.com)
 - `XKEPSTER_WEBHOOK_SECRET` - Webhook secret for signature verification
+- `XKEPSTER_MACHINE_TOKEN` - Machine token for CI/CD and automation (optional)
 - `XKEPSTER_TIMEOUT` - Request timeout in seconds (default: 30)
 - `XKEPSTER_OPEN_TIMEOUT` - Connection timeout in seconds (default: 5)
 - `XKEPSTER_LOGGING_ENABLED` - Enable detailed logging (default: false)
@@ -492,6 +660,76 @@ payload = {
   }
 }
 ```
+
+### Sparse Fieldsets
+
+The client supports JSON:API sparse fieldsets to request only specific attributes. This is useful for reducing payload size and improving performance.
+
+#### Fields Parameter
+
+The `fields` parameter accepts three formats:
+
+1. **Array format** (recommended):
+   ```ruby
+   users = client.users.list(fields: ["first_name", "last_name", "email"])
+   ```
+
+2. **String format** (comma-separated):
+   ```ruby
+   users = client.users.list(fields: "first_name,last_name,email")
+   ```
+
+3. **Hash format** (for multiple resource types):
+   ```ruby
+   users = client.users.list(fields: { users: "first_name,last_name", groups: "name" })
+   ```
+
+The fields parameter follows JSON:API spec format: `fields[resource_type]=field1,field2`. The resource type (e.g., `users`, `groups`) should match the `type` field in the JSON:API response.
+
+#### Field Inputs
+
+The `field_inputs` parameter allows you to pass values to calculations that require user input. This is particularly useful when you need to provide context-specific values for dynamic calculations.
+
+The syntax follows this pattern: `field_inputs[resource_type][calculation_name][parameter_name]=value`
+
+**Example with field inputs:**
+
+```ruby
+# Request monthly engagement calculation with specific month input
+users = client.users.list(
+  fields: ["first_name", "last_name", "monthly_engagement"],
+  field_inputs: {
+    users: {
+      monthly_engagement: { yyyy_mm: "2024.06" }
+    }
+  }
+)
+
+# Multiple calculations with multiple parameters
+users = client.users.list(
+  fields: ["first_name", "monthly_engagement", "quarterly_stats"],
+  field_inputs: {
+    users: {
+      monthly_engagement: { yyyy_mm: "2024.06" },
+      quarterly_stats: { quarter: "Q2", year: "2024" }
+    }
+  }
+)
+```
+
+**Supported Resources:**
+
+All `list` and `retrieve` methods support `fields` and `field_inputs` parameters:
+- `client.users.list(fields: [...], field_inputs: {...})`
+- `client.users.retrieve(id, fields: [...], field_inputs: {...})`
+- `client.groups.list(fields: [...], field_inputs: {...})`
+- `client.groups.retrieve(id, fields: [...], field_inputs: {...})`
+- `client.sessions.list(fields: [...], field_inputs: {...})`
+- `client.sessions.retrieve(id, fields: [...], field_inputs: {...})`
+- `client.tokens.list(fields: [...], field_inputs: {...})`
+- `client.audit_logs.list(fields: [...], field_inputs: {...})`
+- `client.audit_logs.retrieve(id, fields: [...], field_inputs: {...})`
+- `client.operation_tokens.list(fields: [...], field_inputs: {...})`
 
 ## Development
 

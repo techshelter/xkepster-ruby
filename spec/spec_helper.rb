@@ -15,4 +15,34 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  # Reset configuration and clear env vars before each test
+  config.before(:each) do
+    # Store original env vars
+    @original_env = {
+      "XKEPSTER_API_KEY" => ENV["XKEPSTER_API_KEY"],
+      "XKEPSTER_WEBHOOK_SECRET" => ENV["XKEPSTER_WEBHOOK_SECRET"],
+      "XKEPSTER_MACHINE_TOKEN" => ENV["XKEPSTER_MACHINE_TOKEN"],
+      "XKEPSTER_BASE_URL" => ENV["XKEPSTER_BASE_URL"]
+    }
+
+    # Clear env vars for tests
+    ENV.delete("XKEPSTER_API_KEY")
+    ENV.delete("XKEPSTER_WEBHOOK_SECRET")
+    ENV.delete("XKEPSTER_MACHINE_TOKEN")
+    ENV.delete("XKEPSTER_BASE_URL")
+
+    Xkepster.reset_configuration!
+  end
+
+  config.after(:each) do
+    # Restore original env vars
+    @original_env.each do |key, value|
+      if value
+        ENV[key] = value
+      else
+        ENV.delete(key)
+      end
+    end
+  end
 end

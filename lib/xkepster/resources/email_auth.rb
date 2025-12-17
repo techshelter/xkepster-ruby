@@ -27,7 +27,7 @@ module Xkepster
             }
           }
         }
-        client.patch("email_auths/#{email_auth_id}", body: payload)
+        client.patch("email_auths/#{email_auth_id}/verify_token", body: payload)
       end
 
       def resend_magic_link(email_auth_id)
@@ -38,7 +38,7 @@ module Xkepster
             attributes: {}
           }
         }
-        client.patch("email_auths/#{email_auth_id}", body: payload)
+        client.patch("email_auths/#{email_auth_id}/resend_magic_link", body: payload)
       end
     end
   end

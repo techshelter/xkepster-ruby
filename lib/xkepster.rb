@@ -16,6 +16,9 @@ require_relative "xkepster/resources/sms_auth"
 require_relative "xkepster/resources/email_auth"
 require_relative "xkepster/resources/sessions"
 require_relative "xkepster/resources/tokens"
+require_relative "xkepster/resources/operation_tokens"
+require_relative "xkepster/resources/audit_logs"
+require_relative "xkepster/resources/realm"
 require_relative "xkepster/webhook"
 
 module Xkepster

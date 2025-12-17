@@ -3,7 +3,7 @@
 module Xkepster
   class Configuration
     attr_accessor :api_key, :base_url, :timeout, :open_timeout, :adapter, :logger, :user_agent, :webhook_secret,
-                  :log_level, :log_output, :logging_enabled
+                  :log_level, :log_output, :logging_enabled, :machine_token
 
     def initialize
       @api_key = ENV["XKEPSTER_API_KEY"]
@@ -17,6 +17,7 @@ module Xkepster
       @logging_enabled = ENV.fetch("XKEPSTER_LOGGING_ENABLED", "false") == "true"
       @user_agent = "xkepster-ruby #{Xkepster::VERSION} Ruby #{RUBY_VERSION}"
       @webhook_secret = ENV["XKEPSTER_WEBHOOK_SECRET"]
+      @machine_token = ENV["XKEPSTER_MACHINE_TOKEN"]
     end
 
     def inspect
@@ -30,7 +31,8 @@ module Xkepster
         "log_level=#{@log_level.inspect} " \
         "logging_enabled=#{@logging_enabled.inspect} " \
         "user_agent=#{@user_agent.inspect} " \
-        "webhook_secret=[REDACTED]>"
+        "webhook_secret=[REDACTED] " \
+        "machine_token=[REDACTED]>"
     end
   end
 end
