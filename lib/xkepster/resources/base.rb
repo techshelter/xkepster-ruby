@@ -28,6 +28,17 @@ module Xkepster
 
         params
       end
+
+      def build_json_api_payload(type, id = nil, attributes = {}, relationships = {})
+        data = { "type" => type }
+
+        data["id"] = id if id
+        data["attributes"] = attributes unless attributes.empty?
+        data["relationships"] = relationships unless relationships.empty?
+
+        { "data" => data }
+      end
+
     end
   end
 end

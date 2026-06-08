@@ -31,6 +31,10 @@ module Xkepster
         client.get("groups/#{group_id}", params: params)
       end
 
+      def get(group_id)
+        client.get("groups/#{group_id}")
+      end
+
       def update(group_id, name: nil, description: nil, auth_strategy: nil, allow_registration: nil)
         attributes = {}
         attributes[:name] = name unless name.nil?
