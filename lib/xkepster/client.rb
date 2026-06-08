@@ -52,8 +52,8 @@ module Xkepster
       @audit_logs ||= Resources::AuditLogs.new(self)
     end
 
-    def realm
-      @realm ||= Resources::Realms.new(self)
+    def realms
+      @realms ||= Resources::Realms.new(self)
     end
 
     def inspect
