@@ -53,7 +53,7 @@ module Xkepster
     end
 
     def realm
-      @realm ||= Resources::Realm.new(self)
+      @realm ||= Resources::Realms.new(self)
     end
 
     def inspect

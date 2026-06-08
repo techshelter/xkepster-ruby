@@ -60,6 +60,7 @@ module Xkepster
         payload = build_json_api_payload("sms_auths", sms_auth_id)
         client.patch("sms_auths/#{sms_auth_id}/resend_otp", body: payload)
       end
+
     end
   end
 end
