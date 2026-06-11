@@ -23,7 +23,8 @@ RSpec.configure do |config|
       "XKEPSTER_API_KEY" => ENV["XKEPSTER_API_KEY"],
       "XKEPSTER_WEBHOOK_SECRET" => ENV["XKEPSTER_WEBHOOK_SECRET"],
       "XKEPSTER_MACHINE_TOKEN" => ENV["XKEPSTER_MACHINE_TOKEN"],
-      "XKEPSTER_BASE_URL" => ENV["XKEPSTER_BASE_URL"]
+      "XKEPSTER_BASE_URL" => ENV["XKEPSTER_BASE_URL"],
+      "XKEPSTER_BEARER_TOKEN" => ENV["XKEPSTER_BEARER_TOKEN"]
     }
 
     # Clear env vars for tests
@@ -31,6 +32,7 @@ RSpec.configure do |config|
     ENV.delete("XKEPSTER_WEBHOOK_SECRET")
     ENV.delete("XKEPSTER_MACHINE_TOKEN")
     ENV.delete("XKEPSTER_BASE_URL")
+    ENV.delete("XKEPSTER_BEARER_TOKEN")
 
     Xkepster.reset_configuration!
   end

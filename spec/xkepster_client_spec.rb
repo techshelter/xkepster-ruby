@@ -68,6 +68,19 @@ RSpec.describe Xkepster::Client do
           "Accept" => "application/vnd.api+json"
         })
     end
+
+    it "includes Authorization when bearer_token is configured" do
+      bearer_client = described_class.new(
+        api_key: api_key,
+        base_url: "https://api.xkepster.com",
+        bearer_token: "jwt-token"
+      )
+
+      bearer_client.get("/test")
+
+      expect(WebMock).to have_requested(:get, "https://api.xkepster.com/test")
+        .with(headers: { "Authorization" => "Bearer jwt-token" })
+    end
   end
 
   describe "error handling" do

@@ -5,7 +5,7 @@ module Xkepster
     attr_reader :config
 
     def initialize(api_key: nil, base_url: nil, timeout: nil, open_timeout: nil, adapter: nil, logger: nil,
-                   user_agent: nil, log_level: nil, logging_enabled: nil, machine_token: nil)
+                   user_agent: nil, log_level: nil, logging_enabled: nil, machine_token: nil, bearer_token: nil)
       @config = Xkepster.config.dup
       @config.api_key = api_key if api_key
       @config.base_url = base_url if base_url
@@ -17,6 +17,7 @@ module Xkepster
       @config.log_level = log_level if log_level
       @config.logging_enabled = logging_enabled unless logging_enabled.nil?
       @config.machine_token = machine_token if machine_token
+      @config.bearer_token = bearer_token if bearer_token
       @xkepster_logger = nil
     end
 
@@ -140,6 +141,8 @@ module Xkepster
         "User-Agent" => config.user_agent
       }
       headers["X-Machine-Token"] = config.machine_token if config.machine_token
+      headers["Authorization"] = "Bearer #{config.bearer_token}" if config.bearer_token
+
       headers
     end
 
