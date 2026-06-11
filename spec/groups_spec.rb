@@ -292,9 +292,9 @@ RSpec.describe Xkepster::Resources::Groups do
       stub_request(:get, "https://api.xkepster.com/groups")
         .with(
           query: {
-            fields: {
-              groups: "name,description,auth_strategy,allow_registration"
-            }
+            "fields[groups]" => "name,description,auth_strategy,allow_registration",
+            "page[limit]" => "25",
+            "page[offset]" => "0"
           },
           headers: {
             "X-Kepster-Key" => api_key,

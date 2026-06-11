@@ -77,7 +77,7 @@ RSpec.describe Xkepster::Resources::SmsAuth do
               id: sms_auth_id,
               attributes: {
                 otp: otp,
-                user_params: user_params
+                claims: user_params
               }
             }
           }
@@ -129,8 +129,7 @@ RSpec.describe Xkepster::Resources::SmsAuth do
           body: {
             data: {
               type: "sms_auths",
-              id: sms_auth_id,
-              attributes: {}
+              id: sms_auth_id
             }
           }
         )

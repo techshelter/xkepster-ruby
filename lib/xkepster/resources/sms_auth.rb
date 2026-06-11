@@ -6,8 +6,9 @@ module Xkepster
 
       def list(opts = {})
         filter = opts.fetch(:filter, {})
-        params = filter.reduce([]) do |acc, (key, value)|
-          acc << ["filter[#{key}]", value]
+        params = {}
+        filter.each do |key, value|
+          params["filter[#{key}]"] = value
         end
         client.get("sms_auths", params: params)
       end
@@ -48,9 +49,11 @@ module Xkepster
         client.post("sms_auths", body: payload)
       end
 
-      def verify_otp(sms_auth_id:, otp:, user_params: {})
+      def verify_otp(sms_auth_id:, otp:, claims: {}, user_params: nil)
+        claims = user_params unless user_params.nil?
+
         attrs = { "otp" => otp }
-        attrs["claims"] = user_params unless user_params.empty?
+        attrs["claims"] = claims unless claims.empty?
 
         payload = build_json_api_payload("sms_auths", sms_auth_id, attrs)
         client.patch("sms_auths/#{sms_auth_id}/verify_otp", body: payload)
