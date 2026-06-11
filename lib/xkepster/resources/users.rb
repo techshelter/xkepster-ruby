@@ -3,8 +3,24 @@
 module Xkepster
   module Resources
     class Users < Base
-      def list(params = {}, fields: nil, field_inputs: nil)
-        params = add_fields_and_inputs(params, :users, fields: fields, field_inputs: field_inputs)
+      def list(opts = {})
+        limit   = opts.fetch(:limit, 25)
+        offset  = opts.fetch(:offset, 0)
+        filter  = opts.fetch(:filter, {})
+        sort    = opts[:sort]
+        include_param = opts[:include] # Avoid naming conflicts with Ruby's built-in `include` keyword
+
+        params = {
+          "page[limit]" => limit,
+          "page[offset]" => offset
+        }
+
+        filter.each do |key, value|
+          params["filter[#{key}]"] = value
+        end
+
+        params["sort"] = sort if sort
+        params["include"] = include_param if include_param
         client.get("users", params: params)
       end
 
@@ -38,6 +54,10 @@ module Xkepster
       def retrieve(user_id, fields: nil, field_inputs: nil)
         params = add_fields_and_inputs({}, :users, fields: fields, field_inputs: field_inputs)
         client.get("users/#{user_id}", params: params)
+      end
+
+      def get(user_id)
+        client.get("users/#{user_id}")
       end
 
       def update(user_id, first_name: nil, last_name: nil, role: nil, custom_fields: nil, group_ids: nil)

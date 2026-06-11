@@ -4,18 +4,16 @@ module Xkepster
   module Resources
     class Tokens < Base
       def create(user_id, expires_at:, claims: {})
-        attrs = { expires_at: coerce_expires_at(expires_at) }
-        attrs[:claims] = claims unless claims.empty?
-
-        payload = {
-          data: {
-            type: "tokens",
-            attributes: attrs,
-            relationships: {
-              user: { data: { type: "users", id: user_id } }
-            }
+        relationships = {
+          "user" => {
+            "data" => { "type" => "users", "id" => user_id }
           }
         }
+
+        attrs = { "expires_at" => coerce_expires_at(expires_at) }
+        attrs["claims"] = claims unless claims.empty?
+
+        payload = build_json_api_payload("tokens", nil, attrs, relationships)
         client.post("tokens", body: payload)
       end
 
@@ -25,24 +23,12 @@ module Xkepster
       end
 
       def rotate(token_id)
-        payload = {
-          data: {
-            type: "tokens",
-            id: token_id,
-            attributes: {}
-          }
-        }
+        payload = build_json_api_payload("tokens", token_id, {})
         client.patch("tokens/#{token_id}", body: payload)
       end
 
       def revoke(token_id)
-        payload = {
-          data: {
-            type: "tokens",
-            id: token_id,
-            attributes: { revoked: true }
-          }
-        }
+        payload = build_json_api_payload("tokens", token_id, { "revoked" => true })
         client.patch("tokens/#{token_id}", body: payload)
       end
 

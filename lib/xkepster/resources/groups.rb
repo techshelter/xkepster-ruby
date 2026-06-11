@@ -3,7 +3,20 @@
 module Xkepster
   module Resources
     class Groups < Base
-      def list(params = {}, fields: nil, field_inputs: nil)
+      def list(opts = {}, fields: nil, field_inputs: nil)
+        limit  = opts.fetch(:limit, 25)
+        offset = opts.fetch(:offset, 0)
+        filter = opts.fetch(:filter, {})
+
+        params = {
+          "page[limit]" => limit,
+          "page[offset]" => offset
+        }
+
+        filter.each do |key, value|
+          params["filter[#{key}]"] = value
+        end
+
         params = add_group_fields(params, fields)
         params = add_fields_and_inputs(params, :groups, fields: nil, field_inputs: field_inputs)
         client.get("groups", params: params)
@@ -29,6 +42,10 @@ module Xkepster
         params = add_group_fields(params, fields)
         params = add_fields_and_inputs(params, :groups, fields: nil, field_inputs: field_inputs)
         client.get("groups/#{group_id}", params: params)
+      end
+
+      def get(group_id)
+        client.get("groups/#{group_id}")
       end
 
       def update(group_id, name: nil, description: nil, auth_strategy: nil, allow_registration: nil)

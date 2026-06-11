@@ -4,19 +4,21 @@ module Xkepster
   module Resources
     class Sessions < Base
       def create(user_id, attributes: {})
-        payload = {
-          data: {
-            type: "sessions",
-            attributes: attributes,
-            relationships: {
-              user: { data: { type: "users", id: user_id } }
-            }
+        relationships = {
+          "user" => {
+            "data" => { "type" => "users", "id" => user_id }
           }
         }
+        payload = build_json_api_payload("sessions", nil, attributes, relationships)
         client.post("sessions", body: payload)
       end
 
-      def list(params = {}, fields: nil, field_inputs: nil)
+      def list(opts = {}, fields: nil, field_inputs: nil)
+        filter = opts.fetch(:filter, {})
+        params = {}
+        filter.each do |key, value|
+          params["filter[#{key}]"] = value
+        end
         params = add_fields_and_inputs(params, :sessions, fields: fields, field_inputs: field_inputs)
         client.get("sessions", params: params)
       end
@@ -26,25 +28,17 @@ module Xkepster
         client.get("sessions/#{session_id}", params: params)
       end
 
+      def get(session_id)
+        client.get("sessions/#{session_id}")
+      end
+
       def revoke(session_id)
-        payload = {
-          data: {
-            type: "sessions",
-            id: session_id,
-            attributes: { active: false }
-          }
-        }
+        payload = build_json_api_payload("sessions", session_id, { "active" => false })
         client.patch("sessions/#{session_id}", body: payload)
       end
 
       def update_activity(session_id)
-        payload = {
-          data: {
-            type: "sessions",
-            id: session_id,
-            attributes: {}
-          }
-        }
+        payload = build_json_api_payload("sessions", session_id, {})
         client.patch("sessions/#{session_id}", body: payload)
       end
     end
