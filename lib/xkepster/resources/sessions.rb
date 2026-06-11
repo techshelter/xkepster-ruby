@@ -3,6 +3,19 @@
 module Xkepster
   module Resources
     class Sessions < Base
+      def create(user_id, attributes: {})
+        payload = {
+          data: {
+            type: "sessions",
+            attributes: attributes,
+            relationships: {
+              user: { data: { type: "users", id: user_id } }
+            }
+          }
+        }
+        client.post("sessions", body: payload)
+      end
+
       def list(params = {}, fields: nil, field_inputs: nil)
         params = add_fields_and_inputs(params, :sessions, fields: fields, field_inputs: field_inputs)
         client.get("sessions", params: params)

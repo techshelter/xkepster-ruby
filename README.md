@@ -81,9 +81,13 @@ user = client.users.create(
   custom_fields: { department: "Engineering" },
   group_ids: ["group-uuid-1", "group-uuid-2"]
 )
+# Response includes sms_auth_id and email_auth_id fields (nil until auth is set up)
 
 # Get a user
 user = client.users.retrieve("user-uuid")
+# Response includes sms_auth_id and email_auth_id (nullable UUIDs)
+# user['data']['attributes']['sms_auth_id'] => "sms-auth-uuid" or nil
+# user['data']['attributes']['email_auth_id'] => "email-auth-uuid" or nil
 
 # Get a user with specific fields
 user = client.users.retrieve("user-uuid", fields: ["first_name", "last_name"])
@@ -654,6 +658,12 @@ payload = {
       "first_name" => "John",
       "last_name" => "Doe",
       "role" => "user",
+      "locked" => false,
+      "locked_at" => nil,
+      "locked_reason" => nil,
+      "custom_fields" => {},
+      "sms_auth_id" => "sms-auth-uuid",  # or nil if no SMS auth
+      "email_auth_id" => "email-auth-uuid",  # or nil if no email auth
       "inserted_at" => "2025-11-19T14:30:00Z",
       "updated_at" => "2025-11-19T14:30:00Z"
     }
